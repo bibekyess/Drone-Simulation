@@ -1,0 +1,8 @@
+<launch>
+    <include file="$(find simulation_drone)/launch/ee478_darpa.launch" />
+
+    <group ns="scout">
+        <node pkg="drone_offboard" type="drone_offboard_node_ex" name="drone_offboard_node_ex" output="screen"/>
+        <node pkg="drone_offboard" type="waypoint_mission.py" name="waypoint_mission" output="screen"/>
+    </group>
+</launch>

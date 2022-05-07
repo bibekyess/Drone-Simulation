@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- MAVROS posix SITL environment launch script -->
+    <!-- launches Gazebo environment and 2x: MAVROS, PX4 SITL, and spawns vehicle -->
+
+    <!-- vehicle model and world -->
+    <arg name="est" default="ekf2"/>
+    <arg name="vehicle" default="iris"/>
+    <arg name="world" default="$(find subt_custom_gazebo)/worlds/simple_cave_02.world"/>
+
+    <!-- gazebo configs -->
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="false"/>
+    <arg name="paused" default="false"/>
+
+    <!-- use_slam -->
+    <arg name="use_slam" default="false" />
+
+    <!-- Gazebo sim -->
+    <include file="$(find simulation_drone)/launch/empty_world.launch">
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="world_name" value="$(arg world)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="paused" value="$(arg paused)"/>
+    </include>
+
+    <!-- UAV1 -->
+    <group ns="scout">
+        <arg name="ID" value="0"/>
+        <arg name="fcu_url" default="udp://:14540@localhost:14580"/>
+        <include file="$(find simulation_drone)/launch/spawn_drone.launch">
+            <arg name="x" value="0.0"/>
+            <arg name="y" value="0.0"/>
+            <arg name="z" value="0.5"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="ID" value="$(arg ID)"/>
+            <arg name="sdf" default="$(find simulation_drone)/models/AIGC_drone_4/drone.sdf"/>
+        </include>
+
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+        </include>
+    </group>
+
+    <group if="$(arg use_slam)">
+        <!-- Hdl_Graph_SLAM -->
+        <include file="$(find hdl_graph_slam)/launch/hdl_graph_slam.launch">
+            <arg name="points_topic" value="/REPLACE_WITH_LIDAR_POINTCLOUD_TOPIC_NAME" />
+        </include>
+    </group>
+    <node pkg="tf" type="static_transform_publisher" name="os12base_publisher" args="0 0 0 0 0 0 base_link os1_lidar 50" />
+    <node pkg="tf" type="static_transform_publisher" name="mapandodom_publisher" args="0 0 0 0 0 0 map odom 50" />
+
+    <node pkg="fake_localization" type="ground_truth_republisher.py" name="ground_truth_republisher" output="screen" >
+        <remap from="/scout/ground_truth/state_raw" to="/odom" if="$(arg use_slam)"/>
+    </node>
+    
+
+</launch>

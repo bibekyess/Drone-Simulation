@@ -1,0 +1,22 @@
+session_name: ee478_example_launch
+
+environment:
+  DATE: 2021-10-20_1825_03
+  SET_NAME: set5
+
+options:
+  default-command: /bin/bash
+
+windows:
+- window_name: lamp
+  focus: true
+  layout: tiled
+  #shell_command_before:
+  #  - rosparam set /use_sim_time true
+  panes:
+    # - roscore
+    - sleep 1; roslaunch simulation_drone ee478_darpa.launch
+    - sleep 2; rosrun drone_offboard drone_offboard_node_ex __ns:=scout
+    - sleep 2; rosrun drone_offboard waypoint_mission.py __ns:=scout
+    - rviz -d /home/usrg/catkin_ws/src/darpa_sim/ee478_visualization.rviz
+    # - sleep 60; mkdir -p ~/ee478_rosbag/${DATE}_${SET_NAME}; cd ~/ee478_rosbag/${DATE}_${SET_NAME}; rosbag record -a -x "/os1_cloud_node/points"

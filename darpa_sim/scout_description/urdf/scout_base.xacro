@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<robot name="scout" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Properties that can be assigned at build time as arguments.
+  Is there a reason not to make all properties arguments?
+  -->
+  <xacro:arg name='name' default='scout' />
+  <xacro:arg name='visual_material' default='DarkGrey' />
+
+  <property name="sensor_props" value="${load_yaml('$(find scout_description)/config/scout_sensors.yaml')}" />
+
+  <!-- Instantiate iris "mechanics" -->
+  <xacro:include filename="$(find scout_description)/urdf/scout.xacro" />
+
+  <!-- Robot-mounted light -->
+  <include filename="$(find costar_description)/urdf/flashlight.urdf.xacro" />
+  <xacro:flashlight
+      namespace="$(arg namespace)"
+      flashlight_prefix="flashlight"
+      parent_link="base_link"
+      xyz="0.2 0 0.02"
+      rpy="0 0 3.14"
+      default_color="1.0 1.0 1.0">
+    <plugin_params />
+  </xacro:flashlight>
+
+  <!-- Teraranger evo64px -->
+  <xacro:include filename="$(find costar_description)/urdf/sensors/teraranger_evo_64px.urdf.xacro"/>
+  <xacro:teraranger
+      name="${sensor_props['evo64px']['name']}"
+      topic_name="${sensor_props['evo64px']['topic_name']}"
+      hz="${sensor_props['evo64px']['rate']}"
+      parent="${sensor_props['evo64px']['parent']}">
+    <origin xyz="${sensor_props['evo64px']['position']['x']}
+                 ${sensor_props['evo64px']['position']['y']}
+                 ${sensor_props['evo64px']['position']['z']}"
+            rpy="${sensor_props['evo64px']['orientation']['r']}
+                 ${sensor_props['evo64px']['orientation']['p']}
+                 ${sensor_props['evo64px']['orientation']['y']}" />
+  </xacro:teraranger>
+
+</robot>

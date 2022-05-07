@@ -1,0 +1,13 @@
+evo64px:
+  name: evo_64px
+  parent: base_link
+  topic_name: altimetry
+  position:
+    x: 0
+    y: 0
+    z: -0.02
+  orientation:
+    r: 0
+    p: ${pi/2}
+    y: 0
+  rate: 10

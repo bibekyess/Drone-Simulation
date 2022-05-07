@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!--
+  Macros that simplify building drone model in gazebo
+  Inspired by RotorS from ETH
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Main multirotor link -->
+  <xacro:macro name="drone_base_macro"
+    params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
+    <link name="base_link"></link>
+
+    <joint name="base_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="base_link_inertia" />
+    </joint>
+
+    <link name="base_link_inertia">
+      <inertial>
+        <mass value="${mass}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" />
+        <xacro:insert_block name="inertia" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://scout_description/meshes/${mesh_file}"
+            scale="${mesh_scale}" />
+          <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${body_width} ${body_width} ${body_height}" /> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+
+      <gazebo reference="base_link">
+        <material>Gazebo/${color}</material>
+        <turnGravityOff>true</turnGravityOff>
+      </gazebo>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="frame_macro"
+    params="robot_namespace suffix scale body_width body_height height parent color *inertia">
+    <link name="${suffix}_link">
+      <inertial>
+        <mass value="0.00001" />  <!-- [kg] -->
+        <origin xyz="0 0 0" />
+        <xacro:insert_block name="inertia" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 ${height}" rpy="0 0 -1.57079" />
+        <geometry>
+          <mesh filename="package://scout_description/meshes/frame_${suffix}.stl"
+            scale="${scale} ${scale} ${scale}" />
+          <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${body_width} ${body_width} ${body_height}" /> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${suffix}_link">
+      <material>Gazebo/${color}</material>
+    </gazebo>
+
+    <joint name="${suffix}_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${parent}" />
+      <child link="${suffix}_link" />
+    </joint>
+  </xacro:macro>
+
+  <!-- Rotor joint and link -->
+  <xacro:macro name="rotor"
+    params="robot_namespace suffix direction parent mass_rotor radius_rotor motor_number color mesh mesh_scale *origin *inertia">
+    <joint name="rotor_${motor_number}_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1" />
+      <parent link="${parent}" />
+      <child link="rotor_${motor_number}" />
+    </joint>
+    <link name="rotor_${motor_number}">
+      <inertial>
+        <mass value="${mass_rotor}" /> <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+      </inertial>
+      <visual>
+        <geometry>
+          <mesh filename="package://scout_description/meshes/${mesh}_${direction}.dae"
+            scale="${mesh_scale}" />
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="0.005" radius="${radius_rotor}" /> <!-- [m] -->
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="rotor_${motor_number}">
+      <material>Gazebo/${color}</material>
+      <turnGravityOff>true</turnGravityOff>
+    </gazebo>
+  </xacro:macro>
+</robot>

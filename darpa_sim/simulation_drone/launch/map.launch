@@ -1,0 +1,7 @@
+<launch>
+  <arg name="world_name" default="$(find subt_custom_gazebo)/worlds/simple_cave_02.world"/>
+
+  <include file="$(find simulation_drone)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+  </include>
+</launch>

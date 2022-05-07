@@ -1,0 +1,23 @@
+<launch>
+  <arg name="robot_namespace" default="scout"/>
+  <arg name="robot_type" default="scout_v0"/>
+  <arg name="model_file" default="$(find scout_description)/urdf/scout_with_sensor.xacro"/>
+
+
+    <param name="robot_description"
+           command="$(find xacro)/xacro --inorder
+                    $(arg model_file)
+                    enable_logging:=false
+                    enable_ground_truth:=true
+                    mav_name:=$(arg robot_type)
+                    namespace:=$(arg robot_namespace)"/>
+
+  <!-- send fake joint values -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="TRUE"/>
+  </node>
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+
+</launch>

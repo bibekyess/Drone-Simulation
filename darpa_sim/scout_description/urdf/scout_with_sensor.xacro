@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<robot name="scout" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Properties that can be assigned at build time as arguments.
+  Is there a reason not to make all properties arguments?
+  -->
+
+  <!-- Instantiate iris "mechanics" -->
+  <xacro:include filename="$(find scout_description)/urdf/scout_base.xacro" />
+  <xacro:include filename="$(find scout_description)/urdf/hokuyo.urdf.xacro"/>
+
+  <xacro:hokuyo_laser
+    namespace="${namespace}"
+    parent="base_link"
+    xyz="0 0 0.1"
+    rpy="0 0 0">
+  </xacro:hokuyo_laser>
+
+</robot>
